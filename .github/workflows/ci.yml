@@ -55,8 +55,14 @@ jobs:
     needs: [frontend-build, backend-check]
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pushes run all three engines; manual runs use the selected browser.
+        browser: ${{ fromJSON(inputs.browser && format('["{0}"]', inputs.browser) || '["chromium","firefox","webkit"]') }}
+    name: automation (${{ matrix.browser }})
     env:
-      BROWSER: ${{ inputs.browser || 'chromium' }}
+      BROWSER: ${{ matrix.browser }}
     steps:
       - uses: actions/checkout@v4
 
