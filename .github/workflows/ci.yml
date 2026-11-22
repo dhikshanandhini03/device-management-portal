@@ -76,13 +76,16 @@ jobs:
       - name: Install automation dependencies
         working-directory: automation
         run: |
-          pip install -r requirements.txt
-          python -m playwright install --with-deps ${{ env.BROWSER }}
+          set -o pipefail
+          python --version
+          pip install -r requirements.txt 2>&1 | tee pip.log || { tail -25 pip.log | sed 's/^/::error title=pip::/'; exit 1; }
+          python -m playwright install --with-deps ${{ env.BROWSER }} 2>&1 | tee pw.log || { tail -25 pw.log | sed 's/^/::error title=playwright-install::/'; exit 1; }
 
       - name: Run Playwright + API suites
         working-directory: automation
         run: |
           set -o pipefail
+          mkdir -p reports
           MARKERS="${{ inputs.markers }}"
           python -m pytest -n 4 --browser ${{ env.BROWSER }} ${MARKERS:+-m "$MARKERS"} 2>&1 | tee reports/pytest-output.txt
 

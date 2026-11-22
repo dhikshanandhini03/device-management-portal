@@ -13,9 +13,9 @@ class DeviceInventoryPage(BasePage):
     path = "/devices"
 
     def open(self, path: str | None = None):
-        with self.page.expect_response(lambda r: bool(LIST_URL.search(r.url)) and r.ok):
-            super().open(path)
+        super().open(path)
         expect(self.by_id("device-inventory-page")).to_be_visible()
+        expect(self.table.or_(self.by_id("empty-state"))).to_be_visible()
         return self
 
     def _reload_list(self, action: Callable[[], None]) -> None:

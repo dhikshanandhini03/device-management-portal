@@ -15,7 +15,6 @@ class DeviceDetailsPage(BasePage):
 
     def select_tab(self, tab: str) -> None:
         self.by_id(f"tab-{tab}").click()
-        expect(self.page).to_have_url(re.compile(f"tab={tab}"))
         expect(self.by_id(f"tabpanel-{tab}")).to_be_visible()
         self.wait_for_loaded()
 

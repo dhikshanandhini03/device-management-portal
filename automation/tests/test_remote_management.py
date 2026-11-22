@@ -6,6 +6,7 @@ from pages.device_details_page import DeviceDetailsPage
 from pages.remote_management_page import RemoteManagementPage
 from test_data.test_data_factory import DEVICES
 from utils.assertions import assert_status
+from utils.helpers import wait_until
 
 pytestmark = [pytest.mark.remote_operations, pytest.mark.regression]
 
@@ -49,7 +50,7 @@ def test_confirm_reboot_creates_command(remote, online_device, devices):
     assert command["device_id"] == online_device["device_id"]
     assert command["command_type"] == "REBOOT"
     assert command["requested_by"] == "admin"
-    remote.expect_toast(code)
+    expect(remote.by_id("command-tracker")).to_contain_text(code)
 
 
 def test_cancel_reboot_creates_nothing(remote, online_device, devices):
@@ -86,8 +87,10 @@ def test_configuration_synchronization(remote, devices, online_device):
     final = devices.wait_for_command(code)
     assert final["status"] == "SUCCESSFUL"
     assert "synchronised" in final["result_message"].lower()
-    events = devices.events(online_device["device_id"], event_type="CONFIG_SYNC")
-    assert events["total"] >= 1
+    # The device reports its CONFIG_SYNC event on its next event flush.
+    events = wait_until(lambda: devices.events(online_device["device_id"], event_type="CONFIG_SYNC"),
+                        lambda e: e["total"] >= 1, timeout=30, message="CONFIG_SYNC event")
+    assert events["items"][0]["event_type"] == "CONFIG_SYNC"
 
 
 def test_restart_application_requires_app_selection(remote, devices):
