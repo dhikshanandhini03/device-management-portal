@@ -50,6 +50,17 @@ More detail: [docs/architecture.md](docs/architecture.md).
 
 ## Quick start
 
+### Open in the browser (GitHub Codespaces – no local install)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/dhikshanandhini03/device-management-portal?quickstart=1)
+
+The codespace starts the full stack automatically (first start takes a few minutes) and opens the
+**Portal UI** (forwarded port 3000) in a new tab. Find the URL anytime in the **Ports** panel.
+To share it, right-click port 3000 → *Port Visibility* → *Public*. Stop the codespace when done to
+save your free Codespaces hours.
+
+### Run locally
+
 Prerequisites: Docker Desktop (or Docker Engine + Compose v2).
 
 ```bash
