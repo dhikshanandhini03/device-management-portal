@@ -1,0 +1,15 @@
+{
+  "models": {
+    "VIP5662W": {"hardware": "2.3", "serial_prefix": "QA5662"},
+    "Fibe 4K Box (FTB-4K10)": {"hardware": "B1", "serial_prefix": "QA4K10"},
+    "Fibe TV App Box (ATV-200)": {"hardware": "R2", "serial_prefix": "QAATV2"}
+  },
+  "default_test_model": "VIP5662W",
+  "regions": {"Ontario": ["Toronto", "Ottawa"], "Quebec": ["Montreal", "Laval"]},
+  "nonexistent_search": "ZZ-NO-SUCH-DEVICE-0000",
+  "command_types": ["REBOOT", "FACTORY_RESET", "SYNC_CONFIG", "REFRESH_INFO", "RESTART_APP", "CLEAR_APP_CACHE"],
+  "default_app_package": "ca.bell.fibetv",
+  "csv_headers": ["Device ID", "Serial Number", "MAC Address", "Model", "Hardware Version", "Firmware Version", "OS Version",
+                  "IP Address", "Connection Status", "Health", "Last Seen", "Customer Reference", "Region", "City", "Data Source"],
+  "log_severities": ["INFO", "WARNING", "ERROR", "CRITICAL"]
+}

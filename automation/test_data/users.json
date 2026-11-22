@@ -1,0 +1,20 @@
+{
+  "roles": {
+    "admin": {"role": "ADMIN", "label": "Administrator", "full_name": "Alex Morgan",
+              "allowed_nav": ["dashboard", "device-inventory", "device-management", "firmware", "applications", "monitoring", "alerts", "analytics", "users", "audit-logs", "settings"]},
+    "support": {"role": "SUPPORT_ENGINEER", "label": "Support Engineer", "full_name": "Samira Haddad",
+                "allowed_nav": ["dashboard", "device-inventory", "device-management", "firmware", "applications", "monitoring", "alerts", "analytics", "settings"],
+                "denied_nav": ["users", "audit-logs"]},
+    "readonly": {"role": "READ_ONLY", "label": "Read Only", "full_name": "Ryan Leblanc",
+                 "allowed_nav": ["dashboard", "device-inventory", "device-management", "firmware", "applications", "monitoring", "alerts", "analytics", "settings"],
+                 "denied_nav": ["users", "audit-logs"]}
+  },
+  "credential_env": {
+    "admin": ["ADMIN_USERNAME", "ADMIN_PASSWORD"],
+    "support": ["SUPPORT_USERNAME", "SUPPORT_PASSWORD"],
+    "readonly": ["READONLY_USERNAME", "READONLY_PASSWORD"]
+  },
+  "invalid_password_user": "p.nguyen",
+  "deactivated_seed_user": "j.tremblay",
+  "weak_passwords": ["short1!", "alllowercase1!", "NoDigits!!", "NoSpecial123"]
+}
