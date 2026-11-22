@@ -139,7 +139,7 @@ def test_rollback_simulation(devices, device_factory, target_firmware):
 
 
 @pytest.mark.parametrize("role", ["support", "readonly"])
-def test_restricted_user_permissions(request, role, devices, online_device, target_firmware):
+def test_restricted_user_permissions(request, page, role, devices, online_device, target_firmware):
     page = request.getfixturevalue(f"{role}_page")
     client = request.getfixturevalue(f"{role}_api")
     fw = FirmwarePage(page).open_tab("deployments")

@@ -1,5 +1,8 @@
 """Domain helpers on top of ApiClient: devices, commands, firmware, alerts, users, audit."""
 
+# Postponed annotations: DeviceApi defines a method named `list`, which would shadow the builtin in annotations.
+from __future__ import annotations
+
 from api.api_client import ApiClient
 from config.config import COMMAND_TERMINAL_STATUSES, DEPLOYMENT_FINAL_STATUSES
 from config.settings import settings

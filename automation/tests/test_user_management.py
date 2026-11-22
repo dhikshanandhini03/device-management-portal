@@ -120,7 +120,7 @@ def test_login_history_and_activity(users_page):
 
 
 @pytest.mark.parametrize("role", ["support", "readonly"])
-def test_permission_restrictions(request, role):
+def test_permission_restrictions(request, page, role):
     page = request.getfixturevalue(f"{role}_page")
     client = request.getfixturevalue(f"{role}_api")
     expect(page.get_by_test_id("nav-users")).to_have_count(0)
