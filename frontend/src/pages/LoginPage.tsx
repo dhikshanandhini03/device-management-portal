@@ -16,7 +16,7 @@ import {
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useAuth } from "../auth/AuthContext";
-import { errorMessage } from "../api/client";
+import { DEMO_MODE, errorMessage } from "../api/client";
 import { BELL_RED, NAVY } from "../theme";
 
 export default function LoginPage() {
@@ -92,6 +92,13 @@ export default function LoginPage() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Use your portal account to continue.
             </Typography>
+            {DEMO_MODE && (
+              <Alert severity="info" sx={{ mb: 2 }} data-testid="demo-mode-banner">
+                Demo mode: the portal runs entirely in your browser with simulated devices. Sign in as <b>admin</b> / <b>Admin@12345</b>,{" "}
+                <b>support</b> / <b>Support@12345</b> or <b>readonly</b> / <b>Readonly@12345</b>.{" "}
+                <a href={`${import.meta.env.BASE_URL}login?reset-demo=1`} data-testid="demo-reset">Reset demo data</a>
+              </Alert>
+            )}
             {params.get("expired") && !error && (
               <Alert severity="warning" sx={{ mb: 2 }} data-testid="session-expired">
                 Your session has expired. Please sign in again.

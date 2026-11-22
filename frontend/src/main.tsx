@@ -7,6 +7,7 @@ import { theme } from "./theme";
 import App from "./App";
 import { AuthProvider } from "./auth/AuthContext";
 import { NotificationProvider } from "./components/common/Notifier";
+import { api, DEMO_MODE, TOKEN_KEY, USER_KEY } from "./api/client";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,19 +22,28 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <NotificationProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </NotificationProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </React.StrictMode>,
+async function prepare() {
+  if (DEMO_MODE) {
+    const { installDemo } = await import("./demo");
+    await installDemo(api, [TOKEN_KEY, USER_KEY]);
+  }
+}
+
+prepare().then(() =>
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <NotificationProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </NotificationProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </React.StrictMode>,
+  ),
 );

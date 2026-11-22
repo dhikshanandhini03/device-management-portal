@@ -50,6 +50,16 @@ More detail: [docs/architecture.md](docs/architecture.md).
 
 ## Quick start
 
+### Live demo on GitHub Pages
+
+**https://dhikshanandhini03.github.io/device-management-portal/**
+
+The static GitHub Pages build (`.github/workflows/pages.yml`) runs the portal UI with an in-browser demo backend
+(`frontend/src/demo/`): the same API contract, RBAC, seed data, command lifecycle, firmware rollouts and device
+simulator, persisted in your browser's `localStorage`. Sign in with the demo accounts below; use
+*Reset demo data* on the login page to start fresh. UI automation can target this URL; API/gateway tests and
+cross-user scenarios need the full stack (Codespaces or Docker) because each browser keeps its own data.
+
 ### Open in the browser (GitHub Codespaces – no local install)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/dhikshanandhini03/device-management-portal?quickstart=1)

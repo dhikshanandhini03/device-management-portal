@@ -21,7 +21,7 @@ import Grid from "@mui/material/Grid2";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { api, errorMessage } from "../api/client";
+import { api, DEMO_MODE, errorMessage } from "../api/client";
 import PageHeader from "../components/common/PageHeader";
 import KeyValueGrid from "../components/common/KeyValueGrid";
 import ConfirmDialog from "../components/common/ConfirmDialog";
@@ -242,7 +242,14 @@ export default function SettingsPage() {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 BELL STB Device Management is a portfolio and test-automation environment. All devices, telemetry and operations are produced by the bundled STB simulator through the device gateway API. It is not an official Bell Canada system.
               </Typography>
-              <Link href="/api/docs" target="_blank" rel="noopener" data-testid="api-docs-link">Open API documentation (Swagger)</Link>
+              <Link
+                href={DEMO_MODE ? "https://github.com/dhikshanandhini03/device-management-portal#api" : "/api/docs"}
+                target="_blank"
+                rel="noopener"
+                data-testid="api-docs-link"
+              >
+                Open API documentation (Swagger)
+              </Link>
             </CardContent>
           </Card>
         </Grid>

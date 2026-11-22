@@ -2,6 +2,8 @@ import axios, { AxiosError } from "axios";
 
 export const TOKEN_KEY = "bellstb.token";
 export const USER_KEY = "bellstb.user";
+/** Static build (GitHub Pages) where the API is simulated in the browser. */
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
 export const api = axios.create({ baseURL: "/api", timeout: 30000 });
 
