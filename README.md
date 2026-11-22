@@ -181,6 +181,10 @@ pytest --browser firefox
 Reports: `automation/reports/report.html`, `automation/reports/allure-results` (`allure serve ...`),
 traces in `automation/reports/test-results`.
 
+**Nightly E2E (Jenkins):** [nightly-e2e/](nightly-e2e/README.md) is a separate Playwright for Python suite of
+end-to-end business workflows against the GitHub Pages demo, run nightly by
+[nightly-e2e/Jenkinsfile](nightly-e2e/Jenkinsfile).
+
 ## CI/CD
 
 `.github/workflows/ci.yml` builds the frontend, import-checks backend and simulator, starts the full stack

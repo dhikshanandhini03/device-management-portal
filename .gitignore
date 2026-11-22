@@ -20,6 +20,8 @@ automation/reports/
 automation/screenshots/
 automation/logs/
 automation/test-results/
+nightly-e2e/reports/
+nightly-e2e/reports-*.txt
 allure-report/
 
 # Misc

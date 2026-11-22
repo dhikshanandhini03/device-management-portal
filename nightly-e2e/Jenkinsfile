@@ -1,0 +1,159 @@
+// Nightly end-to-end regression of the BELL STB demo portal (GitHub Pages) with Playwright for Python.
+// Required plugins: Pipeline, Git, Docker Pipeline, JUnit, HTML Publisher, Timestamper.
+// Optional: Allure (allure reports), Email Extension (mail on failure/recovery).
+
+pipeline {
+    agent {
+        docker {
+            // Browsers for this Playwright version are pre-installed in the image.
+            image 'mcr.microsoft.com/playwright/python:v1.55.0-noble'
+            args '--ipc=host --shm-size=1g'
+        }
+    }
+
+    triggers {
+        cron('H 2 * * *')
+    }
+
+    options {
+        timestamps()
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(name: 'BASE_URL', defaultValue: 'https://dhikshanandhini03.github.io/device-management-portal', description: 'Portal under test')
+        choice(name: 'BROWSERS', choices: ['chromium', 'all', 'firefox', 'webkit'], description: "'all' runs chromium, firefox and webkit")
+        string(name: 'MARKERS', defaultValue: '', description: 'Optional pytest -m filter, e.g. "firmware or alerts"')
+        string(name: 'WORKERS', defaultValue: '4', description: 'Parallel pytest-xdist workers per browser')
+        string(name: 'NOTIFY_EMAIL', defaultValue: '', description: 'Recipients for failure / recovery mail (comma separated)')
+    }
+
+    environment {
+        SUITE_DIR = 'nightly-e2e'
+        BASE_URL = "${params.BASE_URL}"
+        HOME = "${env.WORKSPACE}"
+        PIP_CACHE_DIR = "${env.WORKSPACE}/.cache/pip"
+        PYTHONUNBUFFERED = '1'
+    }
+
+    stages {
+        stage('Validate parameters') {
+            steps {
+                script {
+                    // Parameters end up in shell commands: allow only safe characters.
+                    if (!(params.BASE_URL ==~ /https?:\/\/[\w.\-:\/]+/)) { error "Invalid BASE_URL: ${params.BASE_URL}" }
+                    if (!(params.MARKERS ==~ /[\w\s()]*/)) { error "Invalid MARKERS expression: ${params.MARKERS}" }
+                    if (!(params.WORKERS ==~ /\d{1,2}|auto/)) { error "Invalid WORKERS value: ${params.WORKERS}" }
+                    currentBuild.description = "${params.BROWSERS} | ${params.MARKERS ?: 'full suite'}"
+                }
+            }
+        }
+
+        stage('Install') {
+            steps {
+                dir(env.SUITE_DIR) {
+                    sh '''
+                        python -m virtualenv -q .venv
+                        . .venv/bin/activate
+                        pip install -q -r requirements.txt
+                        python -m playwright --version
+                        rm -rf reports && mkdir -p reports
+                    '''
+                }
+            }
+        }
+
+        stage('Smoke gate') {
+            steps {
+                dir(env.SUITE_DIR) {
+                    sh '''
+                        . .venv/bin/activate
+                        python -m pytest -m smoke --browser chromium --reruns 2 \
+                            --junitxml=reports/junit-smoke.xml \
+                            --html=reports/smoke.html --self-contained-html \
+                            --output=reports/test-results/smoke
+                    '''
+                }
+            }
+        }
+
+        stage('E2E regression') {
+            steps {
+                dir(env.SUITE_DIR) {
+                    script {
+                        def browsers = params.BROWSERS == 'all' ? ['chromium', 'firefox', 'webkit'] : [params.BROWSERS]
+                        def markers = params.MARKERS?.trim() ? "(${params.MARKERS.trim()}) and not smoke" : 'not smoke'
+                        browsers.each { browser ->
+                            stage("E2E ${browser}") {
+                                def rc = sh(returnStatus: true, script: """
+                                    . .venv/bin/activate
+                                    python -m pytest -m "${markers}" --browser ${browser} -n ${params.WORKERS} \
+                                        --junitxml=reports/junit-${browser}.xml \
+                                        --html=reports/nightly-${browser}.html --self-contained-html \
+                                        --alluredir=reports/allure-results \
+                                        --output=reports/test-results/${browser}
+                                """)
+                                // Exit 1 = test failures (build marked UNSTABLE by the junit step); anything higher is an infrastructure error.
+                                if (rc > 1) { error "pytest did not complete for ${browser} (exit code ${rc})" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: "${env.SUITE_DIR}/reports/junit-*.xml"
+            publishHTML(target: [
+                reportName           : 'Nightly E2E Report',
+                reportDir            : "${env.SUITE_DIR}/reports",
+                reportFiles          : 'smoke.html,nightly-chromium.html,nightly-firefox.html,nightly-webkit.html',
+                reportTitles         : 'Smoke,Chromium,Firefox,WebKit',
+                keepAll              : true,
+                alwaysLinkToLastBuild: true,
+                allowMissing         : true,
+            ])
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${env.SUITE_DIR}/reports/**"
+            script {
+                try {
+                    allure(results: [[path: "${env.SUITE_DIR}/reports/allure-results"]])
+                } catch (err) {
+                    echo "Allure report skipped (plugin not installed): ${err.getMessage()}"
+                }
+            }
+        }
+        failure {
+            script { notify('FAILED') }
+        }
+        unstable {
+            script { notify('UNSTABLE') }
+        }
+        fixed {
+            script { notify('RECOVERED') }
+        }
+    }
+}
+
+def notify(String state) {
+    if (!params.NOTIFY_EMAIL?.trim()) {
+        return
+    }
+    try {
+        emailext(
+            to: params.NOTIFY_EMAIL,
+            subject: "[Nightly E2E] ${state}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            mimeType: 'text/html',
+            body: """<p>Nightly E2E run <b>${state}</b> against ${params.BASE_URL} (${params.BROWSERS}).</p>
+                     <p><a href="${env.BUILD_URL}">Build</a> |
+                        <a href="${env.BUILD_URL}testReport/">Test results</a> |
+                        <a href="${env.BUILD_URL}Nightly_20E2E_20Report/">HTML report</a></p>""",
+            attachLog: state == 'FAILED',
+        )
+    } catch (err) {
+        echo "Email notification skipped: ${err.getMessage()}"
+    }
+}
