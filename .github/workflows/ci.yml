@@ -99,9 +99,14 @@ jobs:
               echo "::error title=pytest::${line}"
             done
           else
-            tail -30 reports/pytest-output.txt | while read -r line; do echo "::error title=pytest-output::${line}"; done
+            tail -8 reports/pytest-output.txt | while read -r line; do echo "::error title=pytest-output::${line}"; done
           fi
           grep -E "passed|failed" reports/pytest-output.txt | tail -1 | sed 's/^/::notice title=summary::/' || true
+
+      - name: Test summary
+        if: success()
+        working-directory: automation
+        run: grep -E "passed|failed" reports/pytest-output.txt | tail -1 | sed 's/^/::notice title=summary::/' || true
 
       - name: Backend logs on failure
         if: failure()
